@@ -1,0 +1,117 @@
+fluents:
+
+Fases(N) requires #int(N).
+RolloPapel(RP) requires #int(RP).
+Tapa(T) requires #int(T).
+Contratapa(CT) requires #int(CT).
+Pliegos(P) requires #int(P).
+Espiral(E) requires #int(E).
+
+RolloColocado.
+RolloAlisado(RA) requires #int(RA).
+RolloRayado(RR) requires #int(RR).
+RolloCortado(RC) requires #int(RC).
+PapelApilado(PA) requires #int(PA).
+PapelTapado.
+PapelconContratapa.
+PapelenCuadernos.
+CuadernoPerforado(CP) requires #int(CP).
+CuadernoListo.
+
+
+actions:
+	ColocarRollo.
+	AlisarRollo.
+	RayarRollo.
+	CortarRollo.
+	ApilarPapel.
+	ColocarTapa.
+	ColocarContratapa.
+	TrozarPliegos.
+	PerforarCuaderno.
+	PonerEspiral.
+
+always:
+	executable ColocarRollo if RolloPapel(CON), CON>=1, Fases(0).
+	caused RolloPapel(New) if Old=New+1 after ColocarRollo, RolloPapel(Old).
+	caused -RolloPapel(Old) after ColocarRollo, RolloPapel(Old).
+	caused Fases(1) after ColocarRollo.
+	caused RolloColocado after ColocarRollo.
+
+	%Alisar y rayar concurrencia 1
+	executable AlisarRollo if RolloAlisado(CON), CON>0, Fases(1).
+	caused RolloAlisado(New) if Old=New+1 after AlisarRollo, RolloAlisado(Old).
+	caused -RolloAlisado(Old) after AlisarRollo, RolloAlisado(Old).
+	caused Fases(2) after AlisarRollo.
+
+	executable RayarRollo if RolloRayado(CON), CON>0, Fases(1).
+	caused RolloRayado(New) if Old=New+1 after RayarRollo, RolloRayado(Old).
+	caused -RolloRayado(Old) after RayarRollo, RolloRayado(Old).
+	caused Fases(2) after RayarRollo.
+
+	executable CortarRollo if RolloCortado(CON), CON>0, Fases(2).
+	caused RolloCortado(New) if Old=New+1 after CortarRollo, RolloCortado(Old).
+	caused -RolloCortado(Old) after CortarRollo, RolloCortado(Old).
+	caused Fases(3) after CortarRollo.
+
+	executable ApilarPapel if PapelApilado(CON), CON>0, Fases(3).
+	caused PapelApilado(New) if Old=New+1 after ApilarPapel, PapelApilado(Old).
+	caused -PapelApilado(Old) after ApilarPapel, PapelApilado(Old).
+	caused Fases(4) after ApilarPapel.
+
+	%Tapa y contratapa concurrencia 2
+	executable ColocarTapa if Tapa(CON), CON>0, Fases(4).
+	caused Tapa(New) if Old=New+1 after ColocarTapa, Tapa(Old).
+	caused -Tapa(Old) after ColocarTapa, Tapa(Old).
+	caused Fases(5) after ColocarTapa.
+	caused PapelTapado after ColocarTapa.
+
+	executable ColocarContratapa if Contratapa(CON), CON>0, Fases(4).
+	caused Contratapa(New) if Old=New+1 after ColocarContratapa, Contratapa(Old).
+	caused -Contratapa(Old) after ColocarContratapa, Contratapa(Old).
+	caused Fases(5) after ColocarContratapa.
+	caused PapelconContratapa after ColocarContratapa.
+
+	executable TrozarPliegos if Pliegos(CON), CON>0, Fases(5).
+	caused Pliegos(New) if Old=New+1 after TrozarPliegos, Pliegos(Old).
+	caused -Pliegos(Old) after TrozarPliegos, Pliegos(Old).
+	caused Fases(6) after TrozarPliegos.
+	caused PapelenCuadernos after TrozarPliegos.
+
+	%Perforar y espiral concurrencia 3
+	executable PerforarCuaderno if CuadernoPerforado(CON), CON>0, Fases(6).
+	caused CuadernoPerforado(New) if Old=New+1 after PerforarCuaderno, CuadernoPerforado(Old).
+	caused -CuadernoPerforado(Old) after PerforarCuaderno, CuadernoPerforado(Old).
+	caused Fases(7) after PerforarCuaderno.
+
+	executable PonerEspiral if Espiral(CON), CON>0, Fases(6).
+	caused Espiral(New) if Old=New+1 after PonerEspiral, Espiral(Old).
+	caused -Espiral(Old) after PonerEspiral, Espiral(Old).
+	caused Fases(7) after PonerEspiral.
+	caused CuadernoListo after PonerEspiral.
+
+	inertial RolloPapel(RP).
+	inertial Tapa(T).
+	inertial Contratapa(CT).
+	inertial Pliegos(P).
+	inertial Espiral(E).
+	inertial RolloAlisado(RA).
+	inertial RolloRayado(RR).
+	inertial RolloCortado(RC).
+	inertial PapelApilado(PA).
+	inertial CuadernoPerforado(CP).
+
+initially:
+	Fases(0).
+	RolloPapel(10).
+	Tapa(20).
+	Contratapa(20).
+	Pliegos(5).
+	Espiral(10).
+	RolloAlisado(1).
+	RolloRayado(1).
+	RolloCortado(1).
+	PapelApilado(1).
+	CuadernoPerforado(1).
+
+goal:Fases(7)? (7)
